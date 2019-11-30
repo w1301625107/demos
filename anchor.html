@@ -1,5 +1,4 @@
 <html>
-
 <body>
   <nav>
     <ul>
@@ -19,12 +18,11 @@
     <input type="radio"
            name="strategy"
            value="type3">显示的自身百分比大就高亮<br><br>
-    颜色右下角可以拖动改变大小
+    <p>颜色右下角可以拖动改变对应元素的大小</p>
   </nav>
 
   <div id="container">
-    <div id="a1">
-    </div>
+    <div id="a1"></div>
     <div id="a2"></div>
     <div id="a3"></div>
     <div id="a4"></div>
@@ -32,28 +30,6 @@
   </div>
 </body>
 <script>
-  function getBoundingClientRectById(id) {
-    const target = document.getElementById(id)
-    return target ? target.getBoundingClientRect() : null
-  }
-
-  function getAllAnchorElement(container) {
-    const target = container ? container : document
-    return target.querySelectorAll('a')
-  }
-
-  function highLightAnchor(id) {
-    const anchors = getAllAnchorElement()
-    anchors.forEach(element => {
-      element.classList.remove('highLight')
-      if (element.hash.slice(1) == id) {
-        element.classList.add('highLight')
-      }
-    });
-  }
-
-  highLightAnchor('a1')
-
   function throttle(fn, interval = 1000) {
     let timer = null;
     return function(...args) {
@@ -83,6 +59,7 @@
         this.remove()
       }
       this.throttleFn = throttle(this[strategy].bind(this), 100)
+      this.throttleFn() // 初始执行一次更新位置
       this.ScrollContrainer.addEventListener('scroll', this.throttleFn, {
         passive: true
       })
@@ -212,7 +189,8 @@
     type3: 'type3'
   }
 
-  const high = new AutoHighLightAnchor(document.querySelector('ul'), document.querySelector('#container'), 'type1')
+  const high = new AutoHighLightAnchor(document.querySelector('ul'), document.querySelector('#container'),
+    AutoHighLightAnchor.Strategys.type1)
 
   document.querySelectorAll('input[type=radio]').forEach(element => {
     element.onchange = e => high.init(e.target.value)
@@ -223,14 +201,13 @@
     margin: 0;
   }
 
-
   a {
     display: block;
     width: 100%;
     height: 100%;
     color: #898A95;
     line-height: 30px;
-    border-radius:0 50px 50px 0;
+    border-radius: 0 50px 50px 0;
     text-decoration: none;
     text-align: center;
   }
@@ -254,10 +231,6 @@
     list-style: none;
   }
 
-  li {
-    /* flex: 1 1 auto; */
-  }
-
   #container {
     height: 100%;
     overflow: scroll;
@@ -267,6 +240,20 @@
     position: relative;
     resize: vertical;
     overflow: scroll;
+    /* color: #ffffff;
+    font-size: 30px; */
+  }
+
+  #container>div::after {
+    content: attr(id);
+    display: block;
+    font-size: 100px;
+    color: #fff;
+    text-align: center;
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   #container>div:hover {
