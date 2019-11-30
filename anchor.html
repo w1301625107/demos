@@ -1,0 +1,308 @@
+<html>
+
+<body>
+  <nav>
+    <ul>
+      <li><a href="#a1">a1</a></li>
+      <li><a href="#a2">a2</a></li>
+      <li><a href="#a3">a3</a></li>
+      <li><a href="#a4">a4</a></li>
+      <li><a href="#a5">a5</a></li>
+    </ul>
+    <input type="radio"
+           name="strategy"
+           checked
+           value="type1">冒头就高亮<br><br>
+    <input type="radio"
+           name="strategy"
+           value="type2">占据屏幕比例大就高亮<br><br>
+    <input type="radio"
+           name="strategy"
+           value="type3">显示的自身百分比大就高亮<br><br>
+    颜色右下角可以拖动改变大小
+  </nav>
+
+  <div id="container">
+    <div id="a1">
+    </div>
+    <div id="a2"></div>
+    <div id="a3"></div>
+    <div id="a4"></div>
+    <div id="a5"></div>
+  </div>
+</body>
+<script>
+  function getBoundingClientRectById(id) {
+    const target = document.getElementById(id)
+    return target ? target.getBoundingClientRect() : null
+  }
+
+  function getAllAnchorElement(container) {
+    const target = container ? container : document
+    return target.querySelectorAll('a')
+  }
+
+  function highLightAnchor(id) {
+    const anchors = getAllAnchorElement()
+    anchors.forEach(element => {
+      element.classList.remove('highLight')
+      if (element.hash.slice(1) == id) {
+        element.classList.add('highLight')
+      }
+    });
+  }
+
+  highLightAnchor('a1')
+
+  function throttle(fn, interval = 1000) {
+    let timer = null;
+    return function(...args) {
+      if (!timer) {
+        timer = setTimeout(() => {
+          timer = null
+          fn.call(this, ...args)
+        }, interval);
+      }
+    }
+  }
+
+  class AutoHighLightAnchor {
+    anchors;
+    ScrollContrainer;
+    throttleFn;
+    strategy;
+    constructor(anchorsContainer, ScrollContrainer, strategy = AutoHighLightAnchor.Strategys.type1) {
+      this.anchors = anchorsContainer.querySelectorAll('a')
+      this.ScrollContrainer = ScrollContrainer;
+      this.strategy = strategy;
+      this.init()
+    }
+
+    init(strategy = this.strategy) {
+      if (this.throttleFn) {
+        this.remove()
+      }
+      this.throttleFn = throttle(this[strategy].bind(this), 100)
+      this.ScrollContrainer.addEventListener('scroll', this.throttleFn, {
+        passive: true
+      })
+    }
+    remove() {
+      this.ScrollContrainer.removeEventListener('scroll', this.throttleFn, {
+        passive: true
+      })
+    }
+
+    highLightAnchor(id) {
+      this.anchors.forEach(element => {
+        element.classList.remove('highLight')
+        if (element.hash.slice(1) == id) {
+          element.classList.add('highLight')
+        }
+      });
+    }
+
+    type1(e) {
+      let highligthId;
+      const windowHeight = this.ScrollContrainer.offsetHeight
+      this.anchors.forEach(element => {
+        const id = element.hash.slice(1)
+        const target = document.getElementById(id)
+        if (target) {
+          const {
+            top
+          } = target.getBoundingClientRect()
+          // 当元素头部可见时
+          if (top < windowHeight) {
+            highligthId = id
+          }
+        }
+      })
+      if (highligthId) {
+        this.highLightAnchor(highligthId)
+      }
+    }
+
+    type2(e) {
+      let highligthId;
+      let maxRatio = 0
+      const windowHeight = this.ScrollContrainer.offsetHeight
+      this.anchors.forEach(element => {
+        const id = element.hash.slice(1)
+        const target = document.getElementById(id)
+        if (target) {
+          let visibleRatio = 0;
+          let {
+            top,
+            height,
+            bottom
+          } = target.getBoundingClientRect();
+          // 当元素全部可见时
+          if (top >= 0 && bottom <= windowHeight) {
+            visibleRatio = height / windowHeight
+          }
+          // 当元素就头部可见时
+          if (top >= 0 && top < windowHeight && bottom > windowHeight) {
+            visibleRatio = (windowHeight - top) / windowHeight
+          }
+          // 当元素占满屏幕时
+          if (top < 0 && bottom > windowHeight) {
+            visibleRatio = 1
+          }
+          // 当元素尾部可见时
+          if (top < 0 && bottom > 0 && bottom < windowHeight) {
+            visibleRatio = bottom / windowHeight
+          }
+          if (visibleRatio >= maxRatio) {
+            maxRatio = visibleRatio;
+            highligthId = id;
+          }
+        }
+      });
+      if (highligthId) {
+        this.highLightAnchor(highligthId)
+      }
+    }
+
+    type3(e) {
+      let highligthId;
+      let maxRatio = 0
+      const windowHeight = this.ScrollContrainer.offsetHeight
+      this.anchors.forEach(element => {
+        const id = element.hash.slice(1)
+        const target = document.getElementById(id)
+        if (target) {
+          let visibleRatio = 0;
+          let {
+            top,
+            height,
+            bottom
+          } = target.getBoundingClientRect();
+          // 当元素全部可见时
+          if (top >= 0 && bottom <= windowHeight) {
+            visibleRatio = 1
+          }
+          // 当元素就头部可见时
+          if (top >= 0 && top < windowHeight && bottom > windowHeight) {
+            visibleRatio = (windowHeight - top) / height
+          }
+          // 当元素占满屏幕时
+          if (top < 0 && bottom > windowHeight) {
+            visibleRatio = windowHeight / height
+          }
+          // 当元素尾部可见时
+          if (top < 0 && bottom > 0 && bottom < windowHeight) {
+            visibleRatio = bottom / height
+          }
+          if (visibleRatio >= maxRatio) {
+            maxRatio = visibleRatio;
+            highligthId = id;
+          }
+        }
+      });
+      if (highligthId) {
+        this.highLightAnchor(highligthId)
+      }
+    }
+
+  }
+  AutoHighLightAnchor.Strategys = {
+    type1: 'type1',
+    type2: 'type2',
+    type3: 'type3'
+  }
+
+  const high = new AutoHighLightAnchor(document.querySelector('ul'), document.querySelector('#container'), 'type1')
+
+  document.querySelectorAll('input[type=radio]').forEach(element => {
+    element.onchange = e => high.init(e.target.value)
+  })
+</script>
+<style>
+  body {
+    margin: 0;
+  }
+
+
+  a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: #898A95;
+    line-height: 30px;
+    border-radius:0 50px 50px 0;
+    text-decoration: none;
+    text-align: center;
+  }
+
+  .highLight {
+    color: #ffffff;
+    background: #77b9e1;
+  }
+
+  nav {
+    width: 120px;
+    float: left;
+  }
+
+  ul {
+    width: 100px;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    /* flex: 1 1 auto; */
+  }
+
+  #container {
+    height: 100%;
+    overflow: scroll;
+  }
+
+  #container>div {
+    position: relative;
+    resize: vertical;
+    overflow: scroll;
+  }
+
+  #container>div:hover {
+    outline: 1px dashed #09f;
+  }
+
+  #container>div::-webkit-scrollbar {
+    width: 25px;
+    height: 20px;
+  }
+
+  #a1 {
+    height: 100vh;
+    background-color: #77b9e1;
+  }
+
+
+  #a2 {
+    height: 50vh;
+    background-color: #9fc6e6;
+  }
+
+  #a3 {
+    height: 33vh;
+    background-color: #73a5d7;
+  }
+
+  #a4 {
+    height: 33vh;
+    background-color: #1387aa;
+  }
+
+  #a5 {
+    height: 20vh;
+    background-color: #0c5ea8;
+  }
+</style>
+
+</html>
