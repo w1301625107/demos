@@ -1,4 +1,5 @@
 <html>
+
 <body>
   <nav>
     <ul>
@@ -18,6 +19,9 @@
     <input type="radio"
            name="strategy"
            value="type3">显示的自身百分比大就高亮<br><br>
+    <input type="checkbox"
+           name="strategy"
+           value="abnormality">触发bug的元素大小<br><br>
     <p>颜色右下角可以拖动改变对应元素的大小</p>
   </nav>
 
@@ -195,6 +199,21 @@
   document.querySelectorAll('input[type=radio]').forEach(element => {
     element.onchange = e => high.init(e.target.value)
   })
+  document.querySelector('input[type=checkbox]').onchange = e => {
+    const value = e.target.checked
+    const elements = document.querySelectorAll('#container>div')
+    if (value) {
+      const abnormality = [30, 120, 20, 30, 50]
+      elements.forEach((element, index) => {
+        element.style.height = abnormality[index] + 'vh'
+      })
+    } else {
+      elements.forEach((element, index) => {
+        element.style.height = (100 - 10 * index) + 'vh'
+      })
+    }
+    console.log("TCL: value", value)
+  }
 </script>
 <style>
   body {
@@ -266,28 +285,28 @@
   }
 
   #a1 {
-    height: 100vh;
+    height: 90vh;
     background-color: #77b9e1;
   }
 
 
   #a2 {
-    height: 50vh;
+    height: 90vh;
     background-color: #9fc6e6;
   }
 
   #a3 {
-    height: 33vh;
+    height: 90vh;
     background-color: #73a5d7;
   }
 
   #a4 {
-    height: 33vh;
+    height: 90vh;
     background-color: #1387aa;
   }
 
   #a5 {
-    height: 20vh;
+    height: 90vh;
     background-color: #0c5ea8;
   }
 </style>
