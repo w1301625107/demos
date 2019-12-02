@@ -19,9 +19,15 @@
     <input type="radio"
            name="strategy"
            value="type3">显示的自身百分比大就高亮<br><br>
-    <input type="checkbox"
+    <input type="radio"
            name="strategy"
+           value="type4">离顶部近就高亮<br><br>
+    <input type="checkbox"
+           name="bug"
            value="abnormality">触发bug的元素大小<br><br>
+    <input type="checkbox"
+           name="friendly_link"
+           value="friendly_link">添加友情元素<br><br>
     <p>颜色右下角可以拖动改变对应元素的大小</p>
   </nav>
 
@@ -31,6 +37,7 @@
     <div id="a3"></div>
     <div id="a4"></div>
     <div id="a5"></div>
+    <div id="friendly_link"></div>
   </div>
 </body>
 <script>
@@ -186,11 +193,36 @@
       }
     }
 
+    type4(e, offsetTop = 0) {
+      let highligthId = Array.prototype.reduce.call(this.anchors, (prev, curr) => {
+        const id = curr.hash.slice(1)
+        const target = document.getElementById(id)
+        if (target) {
+          const {
+            top
+          } = target.getBoundingClientRect()
+          // 当元素头部距离顶部小于规定范围时 即 top <= offsetTop
+          return top <= offsetTop && top > prev.top ? {
+            id,
+            top
+          } : prev
+        } else {
+          return prev
+        }
+      }, {
+        id: null,
+        top: -Infinity
+      }).id;
+      if (highligthId) {
+        this.highLightAnchor(highligthId)
+      }
+    }
   }
   AutoHighLightAnchor.Strategys = {
     type1: 'type1',
     type2: 'type2',
-    type3: 'type3'
+    type3: 'type3',
+    type4: 'type4'
   }
 
   const high = new AutoHighLightAnchor(document.querySelector('ul'), document.querySelector('#container'),
@@ -199,7 +231,7 @@
   document.querySelectorAll('input[type=radio]').forEach(element => {
     element.onchange = e => high.init(e.target.value)
   })
-  document.querySelector('input[type=checkbox]').onchange = e => {
+  document.querySelector('input[name=bug]').onchange = e => {
     const value = e.target.checked
     const elements = document.querySelectorAll('#container>div')
     if (value) {
@@ -212,7 +244,15 @@
         element.style.height = (100 - 10 * index) + 'vh'
       })
     }
-    console.log("TCL: value", value)
+  }
+  document.querySelector('input[name=friendly_link]').onchange = e => {
+    const value = e.target.checked
+    const element = document.querySelector('#friendly_link')
+    if (value) {
+      element.style.display = 'block'
+    } else {
+      element.style.display = 'none'
+    }
   }
 </script>
 <style>
@@ -237,12 +277,14 @@
   }
 
   nav {
-    width: 120px;
+    width: 180px;
     float: left;
+    height: 100vh;
+    overflow: scroll;
   }
 
   ul {
-    width: 100px;
+    width: 150px;
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -308,6 +350,12 @@
   #a5 {
     height: 90vh;
     background-color: #0c5ea8;
+  }
+
+  #friendly_link {
+    display: none;
+    height: 90vh;
+    background-color: #7e92d3;
   }
 </style>
 
