@@ -1,4 +1,9 @@
+<!DOCTYPE html>
 <html>
+
+<head>
+  <meta charset="UTF-8">
+</head>
 
 <body>
   <nav>
@@ -54,10 +59,10 @@
   }
 
   class AutoHighLightAnchor {
-    anchors;
-    ScrollContrainer;
-    throttleFn;
-    strategy;
+    // anchors;
+    // ScrollContrainer;
+    // throttleFn;
+    // strategy;
     constructor(anchorsContainer, ScrollContrainer, strategy = AutoHighLightAnchor.Strategys.type1) {
       this.anchors = anchorsContainer.querySelectorAll('a')
       this.ScrollContrainer = ScrollContrainer;
@@ -294,7 +299,7 @@
   }
 
   #container {
-    height: 100%;
+    height: 100vh;
     overflow: scroll;
   }
 
